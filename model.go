@@ -1,14 +1,67 @@
 package gormplus
 
-import "time"
+import (
+	"errors"
+	"time"
+
+	"github.com/dllgo/go-utils"
+	"github.com/jinzhu/gorm"
+)
 
 type Model struct {
-	ID        int        `gorm:"primary_key;auto_increment" json:"id"`
-	CreatedAt time.Time  `gorm:"column:created_at;type:datetime;" json:"created_at"` // 创建时间
-	UpdatedAt time.Time  `gorm:"column:updated_at;type:datetime;" json:"updated_at"` // 更新时间
-	DeletedAt *time.Time `gorm:"column:deleted_at;type:datetime;" json:"deleted_at" sql:"index"`
+	ID        uint       `gorm:"column:id;primary_key;auto_increment;" json:"id"`
+	CreatedAt time.Time  `gorm:"column:created_at;" json:"created_at"`
+	UpdatedAt time.Time  `gorm:"column:updated_at;" json:"updated_at"`
+	DeletedAt *time.Time `gorm:"column:deleted_at;index;" json:"deleted_at"`
 }
 
 type ModelID struct {
-	ID int `gorm:"primary_key;auto_increment" json:"id"`
+	ID uint `gorm:"column:id;primary_key;auto_increment;" json:"id"`
+}
+
+// FindPage 查询分页数据
+func findPage(db *gorm.DB, pageIndex, pageSize int64, out interface{}) (int64, error) {
+	var count int64
+	result := db.Count(&count)
+	if err := result.Error; err != nil {
+		return 0, err
+	} else if count == 0 {
+		return 0, nil
+	}
+	// 如果分页大小小于0，则不查询数据
+	if pageSize < 0 || pageIndex < 0 {
+		return count, nil
+	}
+	if pageIndex > 0 && pageSize > 0 {
+		db = db.Offset((pageIndex - 1) * pageSize)
+	}
+	if pageSize > 0 {
+		db = db.Limit(pageSize)
+	}
+	if err := db.Find(out).Error; err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+// FindOne 查询单条数据
+func findOne(db *gorm.DB, out interface{}) (bool, error) {
+	if err := db.First(out); err != nil {
+		return false, errors.New("用户不存在")
+	}
+	return true, nil
+}
+
+// Check 检查数据是否存在
+func check(db *gorm.DB) (bool, error) {
+	var count int
+	result := db.Count(&count)
+	if err := result.Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}
+
+func toString(v interface{}) string {
+	return utils.JSONMarshalToString(v)
 }
