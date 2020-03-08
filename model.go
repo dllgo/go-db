@@ -20,7 +20,7 @@ type ModelID struct {
 }
 
 // FindPage 查询分页数据
-func findPage(db *gorm.DB, pageIndex, pageSize int64, out interface{}) (int64, error) {
+func FindPage(db *gorm.DB, pageIndex, pageSize int64, out interface{}) (int64, error) {
 	var count int64
 	result := db.Count(&count)
 	if err := result.Error; err != nil {
@@ -45,7 +45,7 @@ func findPage(db *gorm.DB, pageIndex, pageSize int64, out interface{}) (int64, e
 }
 
 // FindOne 查询单条数据
-func findOne(db *gorm.DB, out interface{}) (bool, error) {
+func FindOne(db *gorm.DB, out interface{}) (bool, error) {
 	if err := db.First(out); err != nil {
 		return false, errors.New("用户不存在")
 	}
@@ -53,7 +53,7 @@ func findOne(db *gorm.DB, out interface{}) (bool, error) {
 }
 
 // Check 检查数据是否存在
-func check(db *gorm.DB) (bool, error) {
+func Check(db *gorm.DB) (bool, error) {
 	var count int
 	result := db.Count(&count)
 	if err := result.Error; err != nil {
@@ -62,6 +62,6 @@ func check(db *gorm.DB) (bool, error) {
 	return count > 0, nil
 }
 
-func toString(v interface{}) string {
+func ToString(v interface{}) string {
 	return utils.JSONMarshalToString(v)
 }
