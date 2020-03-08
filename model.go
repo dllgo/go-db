@@ -46,8 +46,8 @@ func FindPage(db *gorm.DB, pageIndex, pageSize int64, out interface{}) (int64, e
 
 // FindOne 查询单条数据
 func FindOne(db *gorm.DB, out interface{}) (bool, error) {
-	if err := db.First(out); err != nil {
-		return false, errors.New("用户不存在")
+	if err := db.First(out).Error; err != nil {
+		return false, errors.New("数据不存在")
 	}
 	return true, nil
 }
